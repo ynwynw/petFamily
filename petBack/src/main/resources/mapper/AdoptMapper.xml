@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.petback.mapper.AdoptMapper">
+
+    <resultMap id="AdoptResultMap" type="com.example.petback.entity.Adopt">
+        <id property="id" column="id"/>
+        <result property="userName" column="userName"/>
+        <result property="animalImg" column="animalImg"/>
+        <result property="animalName" column="animalName"/>
+        <!-- 映射userName -->
+        <association property="userName" column="userId" select="selectUserName"/>
+        <!-- 映射animalImg -->
+        <association property="animalImg" column="animalId" select="selectAnimalImg"/>
+        <association property="animalName" column="animalId" select="selectAnimalName"/>
+        <!-- 其他Adopt表的字段映射 -->
+        <!-- ... -->
+    </resultMap>
+
+    <select id="selectUserName" resultType="String">
+        SELECT name FROM user WHERE id = #{userId}
+    </select>
+
+    <select id="selectAnimalImg" resultType="String">
+        SELECT img FROM animal WHERE id = #{animalId}
+    </select>
+    <select id="selectAnimalName" resultType="String">
+        SELECT name FROM animal WHERE id = #{animalId}
+    </select>
+
+    <select id="selectByPage" resultMap="AdoptResultMap">
+        SELECT a.*, u.name AS userName, an.img AS animalImg,an.name AS animalName
+        FROM adopt a
+        LEFT JOIN user u ON a.user_id = u.id
+        LEFT JOIN animal an ON a.animal_id = an.id
+        <where>
+            <if test="name != null and name != ''">
+                AND an.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAll" resultType="com.example.petback.entity.Adopt">
+        select adopt.*, user.name as userName, animal.img as animalImg, animal.name as animalName
+        from adopt
+        left join user on adopt.user_id = user.id
+        left join animal on adopt.animal_id = animal.id
+        <where>
+            <if test="id != null"> and id= #{id}</if>
+            <if test="animalId != null"> and animal_id = #{animalId}</if>
+            <if test="status != null"> and status = #{status}</if>
+        </where>
+        order by id desc
+    </select>
+
+    <!-- 根据用户ID查询领养申请 -->
+    <select id="selectByUserId" resultType="com.example.petback.entity.Adopt">
+        SELECT 
+            a.*,
+            u.username as user_name,
+            an.name as animal_name,
+            an.img as animal_img
+        FROM 
+            adopt a
+        LEFT JOIN 
+            user u ON a.user_id = u.id
+        LEFT JOIN 
+            animal an ON a.animal_id = an.id
+        WHERE 
+            a.user_id = #{userId}
+        ORDER BY 
+            a.id DESC
+    </select>
+
+</mapper>

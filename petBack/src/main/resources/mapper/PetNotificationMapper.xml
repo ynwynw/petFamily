@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.petback.mapper.PetNotificationMapper">
+    <select id="selectByPage" resultType="com.example.petback.entity.PetNotification">
+        SELECT pn.*, a.name as petName
+        FROM pet_notification pn
+        LEFT JOIN animal a ON pn.pet_id = a.id
+        <where>
+            <if test="petName != null and petName != ''">
+                AND a.name LIKE CONCAT('%', #{petName}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND pn.status = #{status}
+            </if>
+        </where>
+        ORDER BY pn.timestamp DESC
+    </select>
+</mapper> 

@@ -1,0 +1,8 @@
+# Spark API Configuration
+spark:
+  app-id: 
+  api-key: 
+  api-secret: 
+  api-url: https://spark-api-open.xf-yun.com/v1/chat/completions  # 修改为v1端点
+  model: 4.0Ultra  # 根据v1端点选择合适的模型
+  api-password: 

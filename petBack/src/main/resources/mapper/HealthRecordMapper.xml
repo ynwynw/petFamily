@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.petback.mapper.HealthRecordMapper">
+
+    <resultMap id="healthRecordResultMap" type="com.example.petback.entity.HealthRecord">
+        <id property="id" column="id"/>
+        <result property="petId" column="pet_id"/>
+        <result property="recordDate" column="record_date"/>
+        <result property="temperature" column="temperature"/>
+        <result property="weight" column="weight"/>
+        <result property="height" column="height"/>
+        <result property="vaccinationDate" column="vaccination_date"/>
+        <result property="healthStatus" column="health_status"/>
+        <result property="petName" column="petName"/>
+    </resultMap>
+    <select id="selectPage" resultMap="healthRecordResultMap">
+        SELECT
+        hr.*,
+        a.name AS petName
+        FROM
+        health_record hr
+        LEFT JOIN
+        animal a ON hr.pet_id = a.id
+        WHERE
+        1 = 1
+        <if test="petName!= null and petName!= ''">
+            AND a.name LIKE #{petName}
+        </if>
+        <if test="recordDate!= null and recordDate!= ''">
+            AND hr.record_date = #{recordDate}
+        </if>
+        ORDER BY
+        hr.id DESC
+    </select>
+
+    <select id="selectAll" resultMap="healthRecordResultMap">
+        SELECT
+            hr.*,
+            a.name AS petName
+        FROM
+            health_record hr
+                LEFT JOIN
+            animal a ON hr.pet_id = a.id
+    </select>
+
+    <select id="selectById" resultMap="healthRecordResultMap">
+        SELECT
+            hr.*,
+            a.name AS petName
+        FROM
+            health_record hr
+                LEFT JOIN
+            animal a ON hr.pet_id = a.id
+        WHERE
+            hr.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.petback.mapper.HealthRecordMapper">
+        INSERT INTO health_record (pet_id, record_date, temperature, weight, height, vaccination_date, health_status)
+        VALUES (#{petId}, #{recordDate}, #{temperature}, #{weight}, #{height}, #{vaccinationDate}, #{healthStatus})
+    </insert>
+
+    <update id="update" parameterType="com.example.petback.mapper.HealthRecordMapper">
+        UPDATE health_record
+        SET
+            pet_id = #{petId},
+            record_date = #{recordDate},
+            temperature = #{temperature},
+            weight = #{weight},
+            height = #{height},
+            vaccination_date = #{vaccinationDate},
+            health_status = #{healthStatus}
+        WHERE
+            id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM health_record
+        WHERE
+            id = #{id}
+    </delete>
+
+    <select id="selectByPage" resultMap="healthRecordResultMap">
+        SELECT
+        hr.*,
+        a.name AS petName
+        FROM
+        health_record hr
+        LEFT JOIN
+        animal a ON hr.pet_id = a.id
+        WHERE
+        1 = 1
+        <if test="petName!= null and petName!= ''">
+            AND a.name LIKE #{petName}
+        </if>
+        <if test="vaccinationDate!= null and vaccinationDate!= ''">
+            AND hr.vaccination_date = #{vaccinationDate}
+        </if>
+        ORDER BY
+        hr.id DESC
+    </select>
+
+</mapper>

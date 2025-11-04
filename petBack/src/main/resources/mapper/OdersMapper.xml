@@ -1,0 +1,109 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.petback.mapper.OrdersMapper">
+    <!-- 定义resultMap来映射查询结果 -->
+    <resultMap id="OrdersResultMapper" type="com.example.petback.entity.Orders">
+        <result property="username" column="username"/>
+        <result property="goodsName" column="goodsName"/>
+    </resultMap>
+
+    <!-- 配置一个resultMap，用于映射查询结果 -->
+    <resultMap id="orderAmountResultMap" type="com.example.petback.entity.OrdersAmount">
+        <result property="totalAmount" column="total_amount"/>
+    </resultMap>
+    <!-- 查询订单的总金额 -->
+    <select id="selectTotalOrderAmount" resultMap="orderAmountResultMap">
+        SELECT SUM(num * g.num) AS total_amount
+        FROM orders o
+                 JOIN goods g ON o.goods_id = g.id
+    </select>
+
+    <select id="selectOrderAmountForLastMonth" resultMap="orderAmountResultMap">
+        SELECT SUM(num * g.num) AS total_amount
+        FROM orders o
+                 JOIN  goodsg ON o.goods_id = g.id
+        WHERE o.time &gt; #{lastMonthDate}
+    </select>
+    <!-- 查询商品分页 -->
+    <select id="selectOrdersByPage" resultMap="OrdersResultMapper">
+        SELECT o.*, u.username AS userName, g.name AS goodsName,o.num * g.num AS totalAmount
+        FROM orders o
+                 LEFT JOIN user u ON o.user_id = u.id
+                 LEFT JOIN goods g ON o.goods_id = g.id
+        WHERE o.order_no LIKE CONCAT('%', IFNULL(#{orderNo}, ''), '%')
+          AND (o.goods_id = IFNULL(#{goodsId}, o.goods_id) OR #{goodsId} IS NULL)
+          AND (o.user_id = IF(#{userId} != 0, #{userId}, o.user_id) OR #{userId} IS NULL)
+          AND u.username LIKE CONCAT('%', IFNULL(#{userName}, ''), '%')
+          AND g.name LIKE CONCAT('%', IFNULL(#{goodsName}, ''), '%')
+          AND (o.user_id = #{userId} OR #{userId} IS NULL OR #{userId} = 0)
+    </select>
+
+    <select id="selectByOrderNo" resultMap="OrdersResultMapper">
+        SELECT
+        o.id,
+        o.order_no,
+        o.goods_id,
+        o.num,
+        o.user_id,
+        o.status,
+        o.time,
+        u.username AS username,
+        g.name AS goodsName,
+        o.num * g.price AS totalAmount
+        FROM
+        orders o
+        LEFT JOIN
+        user u ON o.user_id = u.id
+        LEFT JOIN
+        goods g ON o.goods_id = g.id
+        WHERE
+        o.order_no = #{orderNo}
+    </select>
+
+
+    <select id="selectOrdersWithOrderAndUsername" resultMap="OrdersResultMapper">
+        SELECT
+        o.id,
+        o.order_no,
+        o.goods_id,
+        o.num,
+        o.user_id,
+        o.status,
+        o.time,
+        u.name as username,
+        g.name as goodsName
+        FROM
+        orders o
+        LEFT JOIN
+        user u ON o.user_id = u.id
+        LEFT JOIN
+        goods g ON o.goods_id = g.id
+        WHERE
+        <if test="userId != null">
+            o.user_id = #{userId}
+        </if>
+    </select>
+
+    <select id="selectOrdersById" resultMap="OrdersResultMapper">
+        SELECT
+        o.id,
+        o.order_no,
+        o.goods_id,
+        o.num,
+        o.user_id,
+        o.status,
+        o.time,
+        u.name as username,
+        g.name as goodsName
+        FROM
+        orders o
+        LEFT JOIN
+        user u ON o.user_id = u.id
+        LEFT JOIN
+        goods g ON o.goods_id = g.id
+        WHERE
+        <if test="id != null">
+            o.id = #{id}
+        </if>
+    </select>
+
+</mapper>
